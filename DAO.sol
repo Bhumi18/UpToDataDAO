@@ -25,6 +25,8 @@ contract DAO {
         uint256 id;
         string cid;
         string description;
+        uint64 dealId;
+        address d_address;
         address creator;
         uint256 timeCreated;
         uint256 totalVotes;
@@ -57,14 +59,14 @@ contract DAO {
         _;
     }
 
-    /// @param _member is the address of the person who wants to join the DAO.
+    ///@param _member is the address of the person who wants to join the DAO.
     function addMember(address _member) public payable {
         if (!isMemberAdded[_member]) {
             members.push(_member);
         }
     }
 
-    /// @param _numberOfTokens is the number of tokens the person wants to buy.
+    ///@param _numberOfTokens is the number of tokens the person wants to buy.
     function buyTokens(uint256 _numberOfTokens) public payable {
         require(
             msg.value == (_numberOfTokens * s.getTokenPrice()),
@@ -76,16 +78,21 @@ contract DAO {
         emit Sell(msg.sender, _numberOfTokens);
     }
 
-    /// @notice Members will share the cid and wait for votes.
-    /// @param _cid id the cid of the data, _description is the description related to that cid.
-    function createRequest(string memory _cid, string memory _description)
-        public
-    {
+    ///@notice Members will share the cid and wait for votes.
+    ///@param _cid id the cid of the data, _dealId is the storage provider's deal id, _description is the description related to that cid.
+    function createRequest(
+        string memory _cid,
+        uint64 _dealId,
+        address _d_address,
+        string memory _description
+    ) public {
         dataIdCounter += 1;
         idToData[dataIdCounter] = Data(
             dataIdCounter,
             _cid,
             _description,
+            _dealId,
+            _d_address,
             msg.sender,
             block.timestamp,
             0,
@@ -98,8 +105,8 @@ contract DAO {
         allData.push(idToData[dataIdCounter]);
     }
 
-    /// @notice checks msg.sender has joined the DAO; member has not voted yet.
-    /// @param _id is the id of that data struct, and _status is whether the member voted for positive or negative.
+    ///@notice checks msg.sender has joined the DAO; member has not voted yet.
+    ///@param _id is the id of that data struct, and _status is whether the member voted for positive or negative.
     function vote(uint256 _id, uint256 _status)
         public
         checkMember
@@ -116,8 +123,8 @@ contract DAO {
         hasVoted[msg.sender][_id] = true;
     }
 
-    /// @notice Questionable means that the data have no votes yet; allowed means that the data have more positive votes; and not allowed means that the data have more negative votes.
-    /// @param _id is the id of that data struct
+    ///@notice Questionable means that the data have no votes yet; allowed means that the data have more positive votes; and not allowed means that the data have more negative votes.
+    ///@param _id is the id of that data struct
     function decision(uint256 _id) public {
         require(idToData[_id].isChecked == false, "Decision is made already.");
         if (idToData[_id].totalVotes == 0) {
@@ -150,8 +157,18 @@ contract DAO {
         return idToData[_id];
     }
 
-    /// @return total number of data requests in the DAO
+    ///@return total number of data requests in the DAO
     function getTotalPosts() public view returns (uint256) {
         return dataIdCounter;
+    }
+
+    ///@return deal id for the data request
+    function getDealId(uint256 _id) public view returns (uint64) {
+        return idToData[_id].dealId;
+    }
+
+    /// @return deal address for the data request
+    function getDealAddress(uint256 _id) public view returns (address) {
+        return idToData[_id].d_address;
     }
 }

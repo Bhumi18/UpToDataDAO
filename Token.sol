@@ -23,12 +23,12 @@ contract Token {
         totalSupply = _initialSupply;
     }
 
-    /// @return balance of the owner
+    ///@return balance of the owner
     function checkBalance() external view returns (uint256) {
         return balanceOf[admin];
     }
 
-    /// @param _to is the address of the member, _value is the number of tokens he wants to buy
+    ///@param _to is the address of the member, _value is the number of tokens he wants to buy
     function transfer(address _to, uint256 _value)
         public
         returns (bool success)
@@ -40,7 +40,7 @@ contract Token {
         return true;
     }
 
-    /// @return the price of the UTD
+    ///@return the price of the UTD
     function getTokenPrice() external view returns (uint256) {
         return tokenPrice;
     }
